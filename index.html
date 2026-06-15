@@ -33,7 +33,7 @@
         radial-gradient(1px 1px at 35% 65%, #ffdd88, rgba(0,0,0,0)),
         radial-gradient(2px 2px at 78% 43%, #aaccff, rgba(0,0,0,0)),
         radial-gradient(1px 1px at 92% 12%, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(3px 3px at 5% 88%, #99d5ff, rgba(0,0,0,0));
+        radial-gradient(3px 3px at 5% 88%, #99a3ff, rgba(0,0,0,0));
       background-repeat: no-repeat;
       background-size: 200px 200px, 300px 300px, 250px 250px, 200px 200px, 400px 400px;
       opacity: 0.5;
@@ -453,8 +453,8 @@
         labels: lineLabels,
         datasets: [
           { label: 'DKI Jakarta', data: lineDataSets["DKI Jakarta"], borderColor: '#0ff', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: '#0ff' },
-          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#ff44aa', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#ff44aa' },
-          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#aaff44', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#aaff44' }
+          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#2272fb', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#2272fb' },
+          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#d739fa', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#d739fa' }
         ]
       },
       options: {
@@ -487,7 +487,7 @@
         datasets: [{
           label: 'Provinsi (UMP vs Upah/jam)',
           data: scatterData,
-          backgroundColor: '#ff66cc',
+          backgroundColor: '#b547f9',
           pointRadius: 8,
           pointHoverRadius: 14,
           pointBorderColor: '#0ff',
@@ -507,11 +507,31 @@
               }
             }
           },
-          legend: { labels: { color: '#ccffff' } }
+          legend: { display: false }  // ← Sembunyikan legend
         },
         scales: {
-          x: { title: { display: true, text: 'UMP 2023 (Rupiah)', color: '#aaffff' }, ticks: { rotation: 0, color: '#bbddff' }, grid: { color: '#335588' } },
-          y: { title: { display: true, text: 'Rata-rata Upah per Jam (Rupiah)', color: '#aaffff' }, ticks: { rotation: 0, color: '#bbddff' }, grid: { color: '#335588' } }
+          x: { 
+            title: { display: true, text: 'UMP 2023 (Rupiah)', color: '#aaffff' }, 
+            ticks: { 
+              rotation: 0, 
+              color: '#bbddff',
+              callback: function(val) {
+                return val.toLocaleString('id-ID');
+              }
+            }, 
+            grid: { color: '#335588' } 
+          },
+          y: { 
+            title: { display: true, text: 'Rata-rata Upah per Jam (Rupiah)', color: '#aaffff' }, 
+            ticks: { 
+              rotation: 0, 
+              color: '#bbddff',
+              callback: function(val) {
+                return val.toLocaleString('id-ID');
+              }
+            }, 
+            grid: { color: '#335588' } 
+          }
         },
         animation: { duration: 1200, easing: 'easeOutCubic', animateScale: true }
       }
