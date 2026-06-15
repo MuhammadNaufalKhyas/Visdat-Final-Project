@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Dashboard Kesejahteraan Pekerja Indonesia | Interaktif & Animasi</title>
+  <title>Dashboard Kesejahteraan Pekerja Indonesia | Galaxy Neon Theme</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * {
@@ -14,14 +14,38 @@
     }
 
     body {
-      background: linear-gradient(145deg, #f0f4fa 0%, #e6edf4 100%);
-      padding: 2rem 1.5rem;
+      background: radial-gradient(ellipse at 20% 30%, #0a0a2a, #03030f, #000000);
       min-height: 100vh;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    /* efek bintang tiny */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(2px 2px at 10% 20%, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 35% 65%, #ffdd88, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 78% 43%, #aaccff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 92% 12%, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(3px 3px at 5% 88%, #ff99cc, rgba(0,0,0,0));
+      background-repeat: no-repeat;
+      background-size: 200px 200px, 300px 300px, 250px 250px, 200px 200px, 400px 400px;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
     }
 
     .dashboard {
       max-width: 1400px;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
     }
 
     @keyframes fadeSlideUp {
@@ -35,21 +59,12 @@
       }
     }
 
-    @keyframes scalePop {
-      0% {
-        transform: scale(0.95);
-        opacity: 0;
-      }
-      80% {
-        transform: scale(1.02);
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+    @keyframes neonPulse {
+      0% { text-shadow: 0 0 2px #00ffff, 0 0 5px #00ffff; }
+      100% { text-shadow: 0 0 8px #00ffff, 0 0 15px #00ccff; }
     }
 
-    .card, .chart-container, .kpi-card {
+    .kpi-card, .chart-container {
       animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
       opacity: 0;
     }
@@ -57,25 +72,29 @@
     .kpi-card:nth-child(1) { animation-delay: 0.05s; }
     .kpi-card:nth-child(2) { animation-delay: 0.15s; }
     .kpi-card:nth-child(3) { animation-delay: 0.25s; }
-    .chart-container:nth-of-type(1) { animation-delay: 0.3s; }
-    .chart-container:nth-of-type(2) { animation-delay: 0.45s; }
-    .chart-container:nth-of-type(3) { animation-delay: 0.6s; }
+    .chart-container:nth-child(1) { animation-delay: 0.3s; }
+    .chart-container:nth-child(2) { animation-delay: 0.4s; }
+    .chart-container:nth-child(3) { animation-delay: 0.5s; }
+    .chart-container:nth-child(4) { animation-delay: 0.6s; }
 
     h1 {
-      font-size: 1.9rem;
-      background: linear-gradient(135deg, #1A2A4F, #2E4A7C);
+      font-size: 2rem;
+      background: linear-gradient(135deg, #00ffff, #bf4eff, #ff44aa);
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
       margin-bottom: 0.25rem;
       letter-spacing: -0.3px;
+      font-weight: 700;
+      animation: neonPulse 1.5s ease-in-out infinite alternate;
     }
     .subhead {
-      color: #2c3e66;
-      border-left: 4px solid #2E4A7C;
+      color: #b0b7ff;
+      border-left: 4px solid #0ff;
       padding-left: 1rem;
       margin-bottom: 2rem;
       font-weight: 500;
+      text-shadow: 0 0 2px rgba(0,255,255,0.3);
     }
 
     .kpi-row {
@@ -85,40 +104,41 @@
       margin-bottom: 2.5rem;
     }
     .kpi-card {
-      background: rgba(255,255,255,0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(10, 10, 30, 0.65);
+      backdrop-filter: blur(12px);
       border-radius: 2rem;
       padding: 1.2rem 1.8rem;
       flex: 1;
       min-width: 180px;
-      box-shadow: 0 12px 28px -8px rgba(0,32,64,0.12);
-      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2), 0 12px 28px -8px rgba(0,0,0,0.5);
+      border: 1px solid rgba(0, 255, 255, 0.3);
       transition: all 0.25s ease;
     }
     .kpi-card:hover {
       transform: translateY(-5px);
-      background: white;
-      box-shadow: 0 20px 32px -12px rgba(0,0,0,0.2);
-      border-color: #cbdff2;
+      background: rgba(20, 20, 50, 0.85);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), 0 20px 32px -12px black;
+      border-color: #0ff;
     }
     .kpi-label {
       font-size: 0.85rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       font-weight: 600;
-      color: #2c5a7a;
+      color: #88ddff;
     }
     .kpi-value {
       font-size: 2.4rem;
       font-weight: 800;
-      color: #0A2F44;
+      color: #ffffff;
       line-height: 1.2;
       margin-top: 0.3rem;
+      text-shadow: 0 0 5px #0ff;
     }
     .kpi-unit {
       font-size: 1rem;
       font-weight: 500;
-      color: #4a627a;
+      color: #aaccff;
     }
 
     .filter-bar {
@@ -128,11 +148,12 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
-      background: white;
+      background: rgba(5, 5, 20, 0.7);
+      backdrop-filter: blur(12px);
       padding: 0.8rem 1.5rem;
       border-radius: 60px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-      backdrop-filter: blur(4px);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+      border: 1px solid rgba(0, 255, 255, 0.3);
     }
     .filter-group {
       display: flex;
@@ -142,73 +163,90 @@
     }
     .filter-group label {
       font-weight: 600;
-      color: #1f3b4c;
+      color: #bbddff;
     }
     select, .toggle-btn {
-      background: #f0f4fa;
-      border: 1px solid #cddfed;
+      background: #11112a;
+      border: 1px solid #44aaff;
       padding: 0.5rem 1rem;
       border-radius: 2rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
       font-size: 0.85rem;
+      color: #ccffff;
     }
     select:hover, .toggle-btn:hover {
-      background: #e3ebf3;
+      background: #1f1f4a;
       transform: scale(0.97);
+      box-shadow: 0 0 8px #0ff;
+      border-color: #0ff;
     }
     .toggle-btn.active {
-      background: #2E4A7C;
-      color: white;
-      border-color: #2E4A7C;
+      background: #00aaff;
+      color: #000;
+      border-color: #ffffff;
+      box-shadow: 0 0 12px #0ff;
+      font-weight: bold;
     }
 
     .charts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.8rem;
       margin-bottom: 2rem;
     }
     .chart-container {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(4px);
+      background: rgba(8, 8, 25, 0.65);
+      backdrop-filter: blur(12px);
       border-radius: 1.8rem;
       padding: 1.2rem 1rem 1rem 1rem;
-      box-shadow: 0 18px 32px -12px rgba(0,0,0,0.1);
+      box-shadow: 0 0 15px rgba(0, 200, 255, 0.2);
       transition: all 0.2s;
-      border: 1px solid rgba(255,255,255,0.8);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      display: flex;
+      flex-direction: column;
     }
     .chart-container:hover {
       transform: translateY(-4px);
-      background: white;
+      background: rgba(15, 15, 40, 0.8);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+      border-color: #0ff;
     }
     .chart-title {
       font-weight: 700;
       margin-bottom: 1rem;
       padding-left: 0.5rem;
-      border-left: 4px solid #F39C12;
-      font-size: 1.2rem;
-      color: #1f3b4c;
+      border-left: 4px solid #0ff;
+      font-size: 1.1rem;
+      color: #ddffff;
+      text-shadow: 0 0 3px #0ff;
     }
     canvas {
-      max-height: 300px;
+      max-height: 280px;
       width: 100%;
+      flex-grow: 1;
     }
     footer {
       text-align: center;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       font-size: 0.75rem;
-      color: #2c5a7a;
-      border-top: 1px solid #caddf0;
+      color: #88aaff;
+      border-top: 1px solid rgba(0, 255, 255, 0.3);
       padding-top: 1.5rem;
     }
     .source-link {
-      color: #1f6392;
+      color: #0ff;
       text-decoration: none;
       font-weight: 500;
     }
-    @media (max-width: 650px) {
+    .source-link:hover {
+      text-shadow: 0 0 5px #0ff;
+    }
+    @media (max-width: 800px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
       body { padding: 1rem; }
       .kpi-value { font-size: 1.8rem; }
       .filter-bar { border-radius: 1.5rem; flex-direction: column; align-items: stretch; }
@@ -219,7 +257,7 @@
 <body>
 <div class="dashboard">
   <h1> Kesejahteraan Pekerja Indonesia</h1>
-  <div class="subhead">Visualisasi Upah, Tren & Keseimbangan Regional | Data Nyata BPS & Kementerian Ketenagakerjaan</div>
+  <div class="subhead">Visual data kelompok visdat kayaknya</div>
 
   <div class="kpi-row">
     <div class="kpi-card"><div class="kpi-label"> Rata-rata UMP Nasional</div><div class="kpi-value"><span id="avgUmpValue">0</span><span class="kpi-unit"> IDR</span></div></div>
@@ -227,10 +265,9 @@
     <div class="kpi-card"><div class="kpi-label"> Provinsi UMP Terendah</div><div class="kpi-value"><span id="lowestProvince">-</span><br><span id="lowestValue" style="font-size: 1.4rem;">0</span></div></div>
   </div>
 
-
   <div class="filter-bar">
     <div class="filter-group">
-      <label>Filter Tahun:</label>
+      <label> Filter Tahun:</label>
       <select id="yearFilter">
         <option value="2023">2023</option>
         <option value="2022">2022</option>
@@ -239,39 +276,38 @@
       </select>
     </div>
     <div class="filter-group">
-      <label>Toggle Data Bar Chart:</label>
+      <label> Toggle Bar Chart:</label>
       <button id="toggleBarBtn" class="toggle-btn active">UMP (Rp)</button>
       <button id="toggleAvgWageBtn" class="toggle-btn">Rata-rata Upah/Jam</button>
     </div>
-    <div class="filter-group">
-      <span style="font-size:0.75rem;"> Animasi + Tooltip Interaktif</span>
-    </div>
   </div>
 
-  <!-- 3 Chart utama -->
   <div class="charts-grid">
     <div class="chart-container">
       <div class="chart-title"> Perbandingan UMP per Provinsi (2023)</div>
-      <canvas id="barChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+      <canvas id="barChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
       <div class="chart-title"> Tren UMP 3 Provinsi Utama (2020-2023)</div>
-      <canvas id="lineChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+      <canvas id="lineChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
       <div class="chart-title"> Proporsi Pengeluaran Pekerja (Per Kapita / Bulan)</div>
-      <canvas id="doughnutChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+      <canvas id="doughnutChart" width="400" height="280"></canvas>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title"> Korelasi UMP 2023 vs Rata-rata Upah per Jam</div>
+      <canvas id="scatterChart" width="400" height="280"></canvas>
     </div>
   </div>
+
   <footer>
-     Sumber Data: Dataset Kesejahteraan Pekerja Indonesia (Kaggle) by WowEvan — Data riil dari BPS & Kemnaker, diolah untuk tahun 2020-2023. 
+     Sumber Data: Dataset Kesejahteraan Pekerja Indonesia (Kaggle) by WowEvan — Data riil BPS & Kemnaker, diolah 2020-2023.
     <br> <a class="source-link" href="https://www.kaggle.com/datasets/wowevan/dataset-kesejahteraan-pekerja-indonesia" target="_blank">https://www.kaggle.com/datasets/wowevan/dataset-kesejahteraan-pekerja-indonesia</a>
-    <br> Dashboard interaktif dengan Chart.js | Animasi count-up, filter mulus, toggle dataset unik
   </footer>
 </div>
 
 <script>
-
   const umpData = {
     2020: {
       "DKI Jakarta": 4391772, "Jawa Barat": 1854778, "Jawa Timur": 1871357, "DI Yogyakarta": 1765000, "Banten": 2268352,
@@ -291,13 +327,11 @@
     }
   };
 
-
   const avgWagePerHour = {
     "DKI Jakarta": 28750, "Jawa Barat": 15800, "Jawa Timur": 16200, "DI Yogyakarta": 14500, "Banten": 18450,
     "Sumatera Utara": 19500, "Sumatera Selatan": 21800, "Kalimantan Timur": 23800, "Sulawesi Selatan": 21700, "Bali": 20450
   };
 
-  const provincesLine = ["DKI Jakarta", "Jawa Barat", "Jawa Timur"];
   const lineLabels = ["2020", "2021", "2022", "2023"];
   const lineDataSets = {
     "DKI Jakarta": [4391772, 4416186, 4641339, 4901799],
@@ -305,17 +339,20 @@
     "Jawa Timur": [1871357, 1906734, 1978654, 2040944]
   };
 
- 
   const expenditureData = {
     labels: ["Pengeluaran Makanan", "Pengeluaran Non-Makanan (Perumahan, Pendidikan, Kesehatan)"],
-    values: [48.2, 51.8] 
+    values: [48.2, 51.8]
   };
 
+  const provincesForScatter = Object.keys(umpData["2023"]);
+  const scatterData = provincesForScatter.map(prov => ({
+    x: umpData["2023"][prov],
+    y: avgWagePerHour[prov]
+  }));
 
-  let barChart, lineChart, doughnutChart;
-  let currentBarMode = "ump"; 
+  let barChart, lineChart, doughnutChart, scatterChart;
+  let currentBarMode = "ump";
   let currentYear = "2023";
-
 
   function animateKPI(year) {
     const dataYear = umpData[year];
@@ -327,19 +364,16 @@
     const highestVal = dataYear[highestProv];
     const lowestVal = dataYear[lowestProv];
 
-
     const avgElem = document.getElementById("avgUmpValue");
     const highestProvElem = document.getElementById("highestProvince");
     const highestValElem = document.getElementById("highestValue");
     const lowestProvElem = document.getElementById("lowestProvince");
     const lowestValElem = document.getElementById("lowestValue");
 
-
     highestProvElem.innerText = highestProv;
     lowestProvElem.innerText = lowestProv;
 
-
-    function countUp(start, end, element, isCurrency = true) {
+    function countUp(start, end, element) {
       let current = start;
       const step = Math.ceil((end - start) / 40);
       const timer = setInterval(() => {
@@ -348,17 +382,16 @@
           current = end;
           clearInterval(timer);
         }
-        if (isCurrency) element.innerText = current.toLocaleString("id-ID");
-        else element.innerText = current.toLocaleString("id-ID");
+        element.innerText = current.toLocaleString("id-ID");
       }, 15);
     }
 
     let oldAvg = parseInt(avgElem.innerText.replace(/\./g,'')) || 0;
     let oldHigh = parseInt(highestValElem.innerText.replace(/\./g,'')) || 0;
     let oldLow = parseInt(lowestValElem.innerText.replace(/\./g,'')) || 0;
-    countUp(oldAvg, avg, avgElem, true);
-    countUp(oldHigh, highestVal, highestValElem, true);
-    countUp(oldLow, lowestVal, lowestValElem, true);
+    countUp(oldAvg, avg, avgElem);
+    countUp(oldHigh, highestVal, highestValElem);
+    countUp(oldLow, lowestVal, lowestValElem);
   }
 
   function updateBarChart() {
@@ -371,7 +404,6 @@
       newData = Object.values(yearData);
       barChart.data.datasets[0].label = `Upah Minimum Provinsi (Rp) - ${currentYear}`;
     } else {
-
       newLabels = Object.keys(avgWagePerHour);
       newData = Object.values(avgWagePerHour);
       barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp) - ${currentYear} (estimasi)`;
@@ -383,28 +415,23 @@
 
   function refreshKPIAndBar() {
     animateKPI(currentYear);
-    if (currentBarMode === "ump") updateBarChart();
-    else updateBarChart(); 
+    updateBarChart();
   }
 
-
   function initCharts() {
-    const initialYearData = umpData["2023"];
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
       type: 'bar',
       data: {
-        labels: Object.keys(initialYearData),
+        labels: Object.keys(umpData["2023"]),
         datasets: [{
           label: `Upah Minimum Provinsi (Rp) - 2023`,
-          data: Object.values(initialYearData),
-          backgroundColor: 'rgba(46, 74, 124, 0.7)',
-          borderColor: '#1f4a7c',
-          borderWidth: 1,
+          data: Object.values(umpData["2023"]),
+          backgroundColor: '#44aaffaa',
+          borderColor: '#0ff',
+          borderWidth: 1.5,
           borderRadius: 8,
-          hoverBackgroundColor: '#F39C12',
-          barPercentage: 0.7,
-          categoryPercentage: 0.8
+          hoverBackgroundColor: '#ff44ccaa'
         }]
       },
       options: {
@@ -412,10 +439,13 @@
         maintainAspectRatio: true,
         plugins: {
           tooltip: { enabled: true, callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } },
-          legend: { position: 'top' }
+          legend: { labels: { color: '#ccffff' } }
         },
-        scales: { y: { beginAtZero: false, ticks: { callback: (val) => val.toLocaleString('id-ID') } } },
-        animation: { duration: 1000, easing: 'easeOutElastic', delay: (context) => context.dataIndex * 50 }
+        scales: {
+          y: { beginAtZero: false, ticks: { callback: (val) => val.toLocaleString('id-ID'), color: '#bbddff' }, grid: { color: '#335588' } },
+          x: { ticks: { rotation: 0, autoSkip: true, maxRotation: 0, minRotation: 0, color: '#ccddff' }, grid: { color: '#224466' } }
+        },
+        animation: { duration: 1000, easing: 'easeOutQuart' }
       }
     });
 
@@ -425,45 +455,77 @@
       data: {
         labels: lineLabels,
         datasets: [
-          { label: 'DKI Jakarta', data: lineDataSets["DKI Jakarta"], borderColor: '#E67E22', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointHoverRadius: 8 },
-          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#2E86C1', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5 },
-          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#28B463', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5 }
+          { label: 'DKI Jakarta', data: lineDataSets["DKI Jakarta"], borderColor: '#0ff', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: '#0ff' },
+          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#ff44aa', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#ff44aa' },
+          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#aaff44', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#aaff44' }
         ]
       },
       options: {
         responsive: true,
-        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } } },
-        scales: { y: { ticks: { callback: (val) => val.toLocaleString('id-ID') } } },
-        animation: { duration: 1100, easing: 'easeOutQuart' }
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } }, legend: { labels: { color: '#ccffff' } } },
+        scales: { y: { ticks: { callback: (val) => val.toLocaleString('id-ID'), color: '#bbddff' }, grid: { color: '#335588' } }, x: { ticks: { color: '#ccddff' }, grid: { color: '#224466' } } },
+        animation: { duration: 1200, easing: 'easeOutQuart', animateScale: true }
       }
     });
 
-    // ---- Doughnut Chart ----
     const ctxDough = document.getElementById('doughnutChart').getContext('2d');
     doughnutChart = new Chart(ctxDough, {
       type: 'doughnut',
       data: {
         labels: expenditureData.labels,
-        datasets: [{ data: expenditureData.values, backgroundColor: ['#F39C12', '#2E4A7C'], borderWidth: 0, hoverOffset: 12 }]
+        datasets: [{ data: expenditureData.values, backgroundColor: ['#0ff', '#bf4eff'], borderWidth: 0, hoverOffset: 12 }]
       },
       options: {
         responsive: true,
         cutout: '60%',
-        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }, legend: { position: 'bottom' } },
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }, legend: { labels: { color: '#ccffff' }, position: 'bottom' } },
         animation: { animateRotate: true, duration: 1400, easing: 'easeOutBounce' }
+      }
+    });
+
+    const ctxScatter = document.getElementById('scatterChart').getContext('2d');
+    scatterChart = new Chart(ctxScatter, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Provinsi (UMP vs Upah/jam)',
+          data: scatterData,
+          backgroundColor: '#ff66cc',
+          pointRadius: 8,
+          pointHoverRadius: 14,
+          pointBorderColor: '#0ff',
+          borderWidth: 2,
+          showLine: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const prov = provincesForScatter[ctx.dataIndex];
+                return `${prov}: UMP = ${ctx.parsed.x.toLocaleString('id-ID')} Rp, Upah/jam = ${ctx.parsed.y.toLocaleString('id-ID')} Rp`;
+              }
+            }
+          },
+          legend: { labels: { color: '#ccffff' } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'UMP 2023 (Rupiah)', color: '#aaffff' }, ticks: { rotation: 0, color: '#bbddff' }, grid: { color: '#335588' } },
+          y: { title: { display: true, text: 'Rata-rata Upah per Jam (Rupiah)', color: '#aaffff' }, ticks: { rotation: 0, color: '#bbddff' }, grid: { color: '#335588' } }
+        },
+        animation: { duration: 1200, easing: 'easeOutCubic', animateScale: true }
       }
     });
   }
 
-  // event listeners
   function bindEvents() {
     const yearSelect = document.getElementById('yearFilter');
     yearSelect.addEventListener('change', (e) => {
       currentYear = e.target.value;
       refreshKPIAndBar();
- 
-      if (currentBarMode === 'ump') updateBarChart();
-      else updateBarChart();
     });
 
     const toggleUmp = document.getElementById('toggleBarBtn');
@@ -482,14 +544,13 @@
     });
   }
 
-
   window.addEventListener('DOMContentLoaded', () => {
     initCharts();
     bindEvents();
     currentYear = "2023";
     currentBarMode = "ump";
     animateKPI("2023");
-    console.log("Dashboard interaktif siap — Animasi Smooth, Filter, Toggle Unik");
+    console.log("Dashboard galaxy neon: semua chart aktif, efek glow dan warna hitam-neon");
   });
 </script>
 </body>
