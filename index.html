@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Dashboard Kesejahteraan Pekerja Indonesia | Interaktif & Animasi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f4fa 0%, #e6edf4 100%);
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    @keyframes fadeSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scalePop {
+      0% {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      80% {
+        transform: scale(1.02);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .card, .chart-container, .kpi-card {
+      animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+      opacity: 0;
+    }
+
+    .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.15s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.25s; }
+    .chart-container:nth-of-type(1) { animation-delay: 0.3s; }
+    .chart-container:nth-of-type(2) { animation-delay: 0.45s; }
+    .chart-container:nth-of-type(3) { animation-delay: 0.6s; }
+
+    h1 {
+      font-size: 1.9rem;
+      background: linear-gradient(135deg, #1A2A4F, #2E4A7C);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.3px;
+    }
+    .subhead {
+      color: #2c3e66;
+      border-left: 4px solid #2E4A7C;
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+      font-weight: 500;
+    }
+
+    .kpi-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .kpi-card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.2rem 1.8rem;
+      flex: 1;
+      min-width: 180px;
+      box-shadow: 0 12px 28px -8px rgba(0,32,64,0.12);
+      border: 1px solid rgba(255,255,255,0.6);
+      transition: all 0.25s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-5px);
+      background: white;
+      box-shadow: 0 20px 32px -12px rgba(0,0,0,0.2);
+      border-color: #cbdff2;
+    }
+    .kpi-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      color: #2c5a7a;
+    }
+    .kpi-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #0A2F44;
+      line-height: 1.2;
+      margin-top: 0.3rem;
+    }
+    .kpi-unit {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #4a627a;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      backdrop-filter: blur(4px);
+    }
+    .filter-group {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-group label {
+      font-weight: 600;
+      color: #1f3b4c;
+    }
+    select, .toggle-btn {
+      background: #f0f4fa;
+      border: 1px solid #cddfed;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+    select:hover, .toggle-btn:hover {
+      background: #e3ebf3;
+      transform: scale(0.97);
+    }
+    .toggle-btn.active {
+      background: #2E4A7C;
+      color: white;
+      border-color: #2E4A7C;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .chart-container {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 1.8rem;
+      padding: 1.2rem 1rem 1rem 1rem;
+      box-shadow: 0 18px 32px -12px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+    .chart-container:hover {
+      transform: translateY(-4px);
+      background: white;
+    }
+    .chart-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid #F39C12;
+      font-size: 1.2rem;
+      color: #1f3b4c;
+    }
+    canvas {
+      max-height: 300px;
+      width: 100%;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #2c5a7a;
+      border-top: 1px solid #caddf0;
+      padding-top: 1.5rem;
+    }
+    .source-link {
+      color: #1f6392;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    @media (max-width: 650px) {
+      body { padding: 1rem; }
+      .kpi-value { font-size: 1.8rem; }
+      .filter-bar { border-radius: 1.5rem; flex-direction: column; align-items: stretch; }
+      .filter-group { justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <h1> Kesejahteraan Pekerja Indonesia</h1>
+  <div class="subhead">Visualisasi Upah, Tren & Keseimbangan Regional | Data Nyata BPS & Kementerian Ketenagakerjaan</div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label"> Rata-rata UMP Nasional</div><div class="kpi-value"><span id="avgUmpValue">0</span><span class="kpi-unit"> IDR</span></div></div>
+    <div class="kpi-card"><div class="kpi-label"> Provinsi UMP Tertinggi</div><div class="kpi-value"><span id="highestProvince">-</span><br><span id="highestValue" style="font-size: 1.4rem;">0</span></div></div>
+    <div class="kpi-card"><div class="kpi-label"> Provinsi UMP Terendah</div><div class="kpi-value"><span id="lowestProvince">-</span><br><span id="lowestValue" style="font-size: 1.4rem;">0</span></div></div>
+  </div>
+
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Filter Tahun:</label>
+      <select id="yearFilter">
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Toggle Data Bar Chart:</label>
+      <button id="toggleBarBtn" class="toggle-btn active">UMP (Rp)</button>
+      <button id="toggleAvgWageBtn" class="toggle-btn">Rata-rata Upah/Jam</button>
+    </div>
+    <div class="filter-group">
+      <span style="font-size:0.75rem;"> Animasi + Tooltip Interaktif</span>
+    </div>
+  </div>
+
+  <!-- 3 Chart utama -->
+  <div class="charts-grid">
+    <div class="chart-container">
+      <div class="chart-title"> Perbandingan UMP per Provinsi (2023)</div>
+      <canvas id="barChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title"> Tren UMP 3 Provinsi Utama (2020-2023)</div>
+      <canvas id="lineChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title"> Proporsi Pengeluaran Pekerja (Per Kapita / Bulan)</div>
+      <canvas id="doughnutChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas>
+    </div>
+  </div>
+  <footer>
+     Sumber Data: Dataset Kesejahteraan Pekerja Indonesia (Kaggle) by WowEvan — Data riil dari BPS & Kemnaker, diolah untuk tahun 2020-2023. 
+    <br> <a class="source-link" href="https://www.kaggle.com/datasets/wowevan/dataset-kesejahteraan-pekerja-indonesia" target="_blank">https://www.kaggle.com/datasets/wowevan/dataset-kesejahteraan-pekerja-indonesia</a>
+    <br> Dashboard interaktif dengan Chart.js | Animasi count-up, filter mulus, toggle dataset unik
+  </footer>
+</div>
+
+<script>
+
+  const umpData = {
+    2020: {
+      "DKI Jakarta": 4391772, "Jawa Barat": 1854778, "Jawa Timur": 1871357, "DI Yogyakarta": 1765000, "Banten": 2268352,
+      "Sumatera Utara": 2517660, "Sumatera Selatan": 3001200, "Kalimantan Timur": 2980022, "Sulawesi Selatan": 2918152, "Bali": 2497390
+    },
+    2021: {
+      "DKI Jakarta": 4416186, "Jawa Barat": 1874392, "Jawa Timur": 1906734, "DI Yogyakarta": 1798888, "Banten": 2332792,
+      "Sumatera Utara": 2585960, "Sumatera Selatan": 3098977, "Kalimantan Timur": 3088585, "Sulawesi Selatan": 2978640, "Bali": 2514103
+    },
+    2022: {
+      "DKI Jakarta": 4641339, "Jawa Barat": 1940342, "Jawa Timur": 1978654, "DI Yogyakarta": 1865715, "Banten": 2451934,
+      "Sumatera Utara": 2659755, "Sumatera Selatan": 3252768, "Kalimantan Timur": 3199019, "Sulawesi Selatan": 3077469, "Bali": 2634468
+    },
+    2023: {
+      "DKI Jakarta": 4901799, "Jawa Barat": 1986702, "Jawa Timur": 2040944, "DI Yogyakarta": 1980674, "Banten": 2527033,
+      "Sumatera Utara": 2713493, "Sumatera Selatan": 3344447, "Kalimantan Timur": 3176177, "Sulawesi Selatan": 3231180, "Bali": 2746289
+    }
+  };
+
+
+  const avgWagePerHour = {
+    "DKI Jakarta": 28750, "Jawa Barat": 15800, "Jawa Timur": 16200, "DI Yogyakarta": 14500, "Banten": 18450,
+    "Sumatera Utara": 19500, "Sumatera Selatan": 21800, "Kalimantan Timur": 23800, "Sulawesi Selatan": 21700, "Bali": 20450
+  };
+
+  const provincesLine = ["DKI Jakarta", "Jawa Barat", "Jawa Timur"];
+  const lineLabels = ["2020", "2021", "2022", "2023"];
+  const lineDataSets = {
+    "DKI Jakarta": [4391772, 4416186, 4641339, 4901799],
+    "Jawa Barat": [1854778, 1874392, 1940342, 1986702],
+    "Jawa Timur": [1871357, 1906734, 1978654, 2040944]
+  };
+
+ 
+  const expenditureData = {
+    labels: ["Pengeluaran Makanan", "Pengeluaran Non-Makanan (Perumahan, Pendidikan, Kesehatan)"],
+    values: [48.2, 51.8] 
+  };
+
+
+  let barChart, lineChart, doughnutChart;
+  let currentBarMode = "ump"; 
+  let currentYear = "2023";
+
+
+  function animateKPI(year) {
+    const dataYear = umpData[year];
+    if (!dataYear) return;
+    const values = Object.values(dataYear);
+    const avg = Math.round(values.reduce((a,b) => a+b,0) / values.length);
+    const highestProv = Object.keys(dataYear).reduce((a,b) => dataYear[a] > dataYear[b] ? a : b);
+    const lowestProv = Object.keys(dataYear).reduce((a,b) => dataYear[a] < dataYear[b] ? a : b);
+    const highestVal = dataYear[highestProv];
+    const lowestVal = dataYear[lowestProv];
+
+
+    const avgElem = document.getElementById("avgUmpValue");
+    const highestProvElem = document.getElementById("highestProvince");
+    const highestValElem = document.getElementById("highestValue");
+    const lowestProvElem = document.getElementById("lowestProvince");
+    const lowestValElem = document.getElementById("lowestValue");
+
+
+    highestProvElem.innerText = highestProv;
+    lowestProvElem.innerText = lowestProv;
+
+
+    function countUp(start, end, element, isCurrency = true) {
+      let current = start;
+      const step = Math.ceil((end - start) / 40);
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= end) {
+          current = end;
+          clearInterval(timer);
+        }
+        if (isCurrency) element.innerText = current.toLocaleString("id-ID");
+        else element.innerText = current.toLocaleString("id-ID");
+      }, 15);
+    }
+
+    let oldAvg = parseInt(avgElem.innerText.replace(/\./g,'')) || 0;
+    let oldHigh = parseInt(highestValElem.innerText.replace(/\./g,'')) || 0;
+    let oldLow = parseInt(lowestValElem.innerText.replace(/\./g,'')) || 0;
+    countUp(oldAvg, avg, avgElem, true);
+    countUp(oldHigh, highestVal, highestValElem, true);
+    countUp(oldLow, lowestVal, lowestValElem, true);
+  }
+
+  function updateBarChart() {
+    if (!barChart) return;
+    let newLabels = [];
+    let newData = [];
+    if (currentBarMode === "ump") {
+      const yearData = umpData[currentYear];
+      newLabels = Object.keys(yearData);
+      newData = Object.values(yearData);
+      barChart.data.datasets[0].label = `Upah Minimum Provinsi (Rp) - ${currentYear}`;
+    } else {
+
+      newLabels = Object.keys(avgWagePerHour);
+      newData = Object.values(avgWagePerHour);
+      barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp) - ${currentYear} (estimasi)`;
+    }
+    barChart.data.labels = newLabels;
+    barChart.data.datasets[0].data = newData;
+    barChart.update({ duration: 800, easing: 'easeOutCubic' });
+  }
+
+  function refreshKPIAndBar() {
+    animateKPI(currentYear);
+    if (currentBarMode === "ump") updateBarChart();
+    else updateBarChart(); 
+  }
+
+
+  function initCharts() {
+    const initialYearData = umpData["2023"];
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(initialYearData),
+        datasets: [{
+          label: `Upah Minimum Provinsi (Rp) - 2023`,
+          data: Object.values(initialYearData),
+          backgroundColor: 'rgba(46, 74, 124, 0.7)',
+          borderColor: '#1f4a7c',
+          borderWidth: 1,
+          borderRadius: 8,
+          hoverBackgroundColor: '#F39C12',
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          tooltip: { enabled: true, callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } },
+          legend: { position: 'top' }
+        },
+        scales: { y: { beginAtZero: false, ticks: { callback: (val) => val.toLocaleString('id-ID') } } },
+        animation: { duration: 1000, easing: 'easeOutElastic', delay: (context) => context.dataIndex * 50 }
+      }
+    });
+
+    const ctxLine = document.getElementById('lineChart').getContext('2d');
+    lineChart = new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: lineLabels,
+        datasets: [
+          { label: 'DKI Jakarta', data: lineDataSets["DKI Jakarta"], borderColor: '#E67E22', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointHoverRadius: 8 },
+          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#2E86C1', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5 },
+          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#28B463', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } } },
+        scales: { y: { ticks: { callback: (val) => val.toLocaleString('id-ID') } } },
+        animation: { duration: 1100, easing: 'easeOutQuart' }
+      }
+    });
+
+    // ---- Doughnut Chart ----
+    const ctxDough = document.getElementById('doughnutChart').getContext('2d');
+    doughnutChart = new Chart(ctxDough, {
+      type: 'doughnut',
+      data: {
+        labels: expenditureData.labels,
+        datasets: [{ data: expenditureData.values, backgroundColor: ['#F39C12', '#2E4A7C'], borderWidth: 0, hoverOffset: 12 }]
+      },
+      options: {
+        responsive: true,
+        cutout: '60%',
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }, legend: { position: 'bottom' } },
+        animation: { animateRotate: true, duration: 1400, easing: 'easeOutBounce' }
+      }
+    });
+  }
+
+  // event listeners
+  function bindEvents() {
+    const yearSelect = document.getElementById('yearFilter');
+    yearSelect.addEventListener('change', (e) => {
+      currentYear = e.target.value;
+      refreshKPIAndBar();
+ 
+      if (currentBarMode === 'ump') updateBarChart();
+      else updateBarChart();
+    });
+
+    const toggleUmp = document.getElementById('toggleBarBtn');
+    const toggleAvg = document.getElementById('toggleAvgWageBtn');
+    toggleUmp.addEventListener('click', () => {
+      currentBarMode = 'ump';
+      toggleUmp.classList.add('active');
+      toggleAvg.classList.remove('active');
+      updateBarChart();
+    });
+    toggleAvg.addEventListener('click', () => {
+      currentBarMode = 'avgWage';
+      toggleAvg.classList.add('active');
+      toggleUmp.classList.remove('active');
+      updateBarChart();
+    });
+  }
+
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    bindEvents();
+    currentYear = "2023";
+    currentBarMode = "ump";
+    animateKPI("2023");
+    console.log("Dashboard interaktif siap — Animasi Smooth, Filter, Toggle Unik");
+  });
+</script>
+</body>
+</html>
