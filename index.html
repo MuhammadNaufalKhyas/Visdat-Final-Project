@@ -141,17 +141,23 @@
 
     .filter-bar {
       display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: rgba(5, 5, 20, 0.7);
+      backdrop-filter: blur(12px);
+      padding: 1.2rem 1.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+    }
+    .filter-top-row {
+      display: flex;
       flex-wrap: wrap;
       gap: 1rem;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
-      background: rgba(5, 5, 20, 0.7);
-      backdrop-filter: blur(12px);
-      padding: 0.8rem 1.5rem;
-      border-radius: 60px;
-      box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
-      border: 1px solid rgba(0, 255, 255, 0.3);
+      width: 100%;
     }
     .filter-group {
       display: flex;
@@ -186,6 +192,45 @@
       border-color: #ffffff;
       box-shadow: 0 0 12px #0ff;
       font-weight: bold;
+    }
+
+    .region-filter-group {
+      border-top: 1px dashed rgba(0, 255, 255, 0.2);
+      padding-top: 0.8rem;
+      width: 100%;
+    }
+    .region-label {
+      font-weight: 600;
+      color: #bbddff;
+      margin-bottom: 0.5rem;
+      display: block;
+      font-size: 0.9rem;
+    }
+    .checkbox-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #ccffff;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: rgba(25, 25, 60, 0.4);
+      padding: 0.3rem 0.8rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(68, 170, 255, 0.3);
+      transition: all 0.2s;
+    }
+    .checkbox-item:hover {
+      border-color: #0ff;
+      background: rgba(25, 25, 60, 0.8);
+    }
+    .checkbox-item input {
+      cursor: pointer;
+      accent-color: #00aaff;
     }
 
     .charts-grid {
@@ -246,8 +291,6 @@
       }
       body { padding: 1rem; }
       .kpi-value { font-size: 1.8rem; }
-      .filter-bar { border-radius: 1.5rem; flex-direction: column; align-items: stretch; }
-      .filter-group { justify-content: space-between; }
     }
   </style>
 </head>
@@ -263,33 +306,41 @@
   </div>
 
   <div class="filter-bar">
-    <div class="filter-group">
-      <label> Filter Tahun:</label>
-      <select id="yearFilter">
-        <option value="2023">2023</option>
-        <option value="2022">2022</option>
-        <option value="2021">2021</option>
-        <option value="2020">2020</option>
-      </select>
+    <div class="filter-top-row">
+      <div class="filter-group">
+        <label> Filter Tahun:</label>
+        <select id="yearFilter">
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label> Toggle Bar Chart:</label>
+        <button id="toggleBarBtn" class="toggle-btn active">UMP (Rp)</button>
+        <button id="toggleAvgWageBtn" class="toggle-btn">Rata-rata Upah/Jam</button>
+      </div>
     </div>
-    <div class="filter-group">
-      <label> Toggle Bar Chart:</label>
-      <button id="toggleBarBtn" class="toggle-btn active">UMP (Rp)</button>
-      <button id="toggleAvgWageBtn" class="toggle-btn">Rata-rata Upah/Jam</button>
+    
+    <div class="region-filter-group">
+      <span class="region-label">Pilih Daerah Tampil (Tren Line Chart):</span>
+      <div class="checkbox-container" id="regionCheckboxContainer">
+        </div>
     </div>
   </div>
 
   <div class="charts-grid">
     <div class="chart-container">
-      <div class="chart-title" id="barChartTitle"> Perbandingan UMP per Provinsi</div>
+      <div class="chart-title" id="barChartTitle"> Perbandingan UMP per Provinsi (2023)</div>
       <canvas id="barChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title" id="lineChartTitle"> Tren UMP 3 Provinsi Utama (2020-2023)</div>
+      <div class="chart-title" id="lineChartTitle"> Tren UMP Seluruh Provinsi (2020-2023)</div>
       <canvas id="lineChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title" id="doughnutChartTitle"> Proporsi Pengeluaran Pekerja (Per Kapita / Bulan)</div>
+      <div class="chart-title" id="doughnutChartTitle"> Proporsi Rata-rata Pengeluaran Pekerja (2023)</div>
       <canvas id="doughnutChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
@@ -305,55 +356,93 @@
 </div>
 
 <script>
+  // 1. DATASET UTAMA (HARDCODED)
   const umpData = {
-    2020: {
-      "DKI Jakarta": 4391772, "Jawa Barat": 1854778, "Jawa Timur": 1871357, "DI Yogyakarta": 1765000, "Banten": 2268352,
-      "Sumatera Utara": 2517660, "Sumatera Selatan": 3001200, "Kalimantan Timur": 2980022, "Sulawesi Selatan": 2918152, "Bali": 2497390
+    "2020": {
+      "DKI Jakarta": 4276349, "Jawa Barat": 1810351, "Jawa Timur": 1768000, "DI Yogyakarta": 1704608, "Banten": 2460944,
+      "Sumatera Utara": 2499423, "Sumatera Selatan": 3043111, "Kalimantan Timur": 2981378, "Sulawesi Selatan": 3103800, "Bali": 2494000
     },
-    2021: {
-      "DKI Jakarta": 4416186, "Jawa Barat": 1874392, "Jawa Timur": 1906734, "DI Yogyakarta": 1798888, "Banten": 2332792,
-      "Sumatera Utara": 2585960, "Sumatera Selatan": 3098977, "Kalimantan Timur": 3088585, "Sulawesi Selatan": 2978640, "Bali": 2514103
+    "2021": {
+      "DKI Jakarta": 4416186, "Jawa Barat": 1810351, "Jawa Timur": 1868777, "DI Yogyakarta": 1765000, "Banten": 2460944,
+      "Sumatera Utara": 2499423, "Sumatera Selatan": 3043111, "Kalimantan Timur": 2981378, "Sulawesi Selatan": 3165876, "Bali": 2494000
     },
-    2022: {
-      "DKI Jakarta": 4641339, "Jawa Barat": 1940342, "Jawa Timur": 1978654, "DI Yogyakarta": 1865715, "Banten": 2451934,
-      "Sumatera Utara": 2659755, "Sumatera Selatan": 3252768, "Kalimantan Timur": 3199019, "Sulawesi Selatan": 3077469, "Bali": 2634468
+    "2022": {
+      "DKI Jakarta": 4641854, "Jawa Barat": 1841487, "Jawa Timur": 1891567, "DI Yogyakarta": 1840915, "Banten": 2501203,
+      "Sumatera Utara": 2522609, "Sumatera Selatan": 3144446, "Kalimantan Timur": 3014497, "Sulawesi Selatan": 3165876, "Bali": 2516971
     },
-    2023: {
-      "DKI Jakarta": 4901799, "Jawa Barat": 1986702, "Jawa Timur": 2040944, "DI Yogyakarta": 1980674, "Banten": 2527033,
-      "Sumatera Utara": 2713493, "Sumatera Selatan": 3344447, "Kalimantan Timur": 3176177, "Sulawesi Selatan": 3231180, "Bali": 2746289
+    "2023": {
+      "DKI Jakarta": 4901798, "Jawa Barat": 1986670, "Jawa Timur": 2040244, "DI Yogyakarta": 1981782, "Banten": 2661280,
+      "Sumatera Utara": 2710493, "Sumatera Selatan": 3404177, "Kalimantan Timur": 3201396, "Sulawesi Selatan": 3385145, "Bali": 2713672
     }
   };
 
   const avgWagePerHour = {
     "DKI Jakarta": 28750, "Jawa Barat": 15800, "Jawa Timur": 16200, "DI Yogyakarta": 14500, "Banten": 18450,
-    "Sumatera Utara": 19500, "Sumatera Selatan": 21800, "Kalimantan Timur": 23800, "Sulawesi Selatan": 21700, "Bali": 20450
+    "Sumatera Utara": 15500, "Sumatera Selatan": 17800, "Kalimantan Timur": 21800, "Sulawesi Selatan": 16700, "Bali": 17450
   };
 
   const lineLabels = ["2020", "2021", "2022", "2023"];
   const lineDataSets = {
-    "DKI Jakarta": [4391772, 4416186, 4641339, 4901799],
-    "Jawa Barat": [1854778, 1874392, 1940342, 1986702],
-    "Jawa Timur": [1871357, 1906734, 1978654, 2040944]
+    "DKI Jakarta": [4276349, 4416186, 4641854, 4901798],
+    "Jawa Barat": [1810351, 1810351, 1841487, 1986670],
+    "Jawa Timur": [1768000, 1868777, 1891567, 2040244],
+    "DI Yogyakarta": [1704608, 1765000, 1840915, 1981782],
+    "Banten": [2460944, 2460944, 2501203, 2661280],
+    "Sumatera Utara": [2499423, 2499423, 2522609, 2710493],
+    "Sumatera Selatan": [3043111, 3043111, 3144446, 3404177],
+    "Kalimantan Timur": [2981378, 2981378, 3014497, 3201396],
+    "Sulawesi Selatan": [3103800, 3165876, 3165876, 3385145],
+    "Bali": [2494000, 2494000, 2516971, 2713672]
   };
 
   const expenditureData = {
-    labels: ["Pengeluaran Makanan", "Pengeluaran Non-Makanan (Perumahan, Pendidikan, Kesehatan)"],
-    values: [48.2, 51.8]
+    "2020": [49.5, 50.5],
+    "2021": [49.1, 50.9],
+    "2022": [48.7, 51.3],
+    "2023": [48.2, 51.8]
   };
 
-  const provincesForScatter = Object.keys(umpData["2023"]);
+  const provincesList = Object.keys(avgWagePerHour);
+  let selectedRegions = {};
+  provincesList.forEach(prov => selectedRegions[prov] = true); // Default awal semua aktif (true)
 
   let barChart, lineChart, doughnutChart, scatterChart;
   let currentBarMode = "ump";
   let currentYear = "2023";
 
+  // 2. LOGIKA GENERASI CHECKBOX DI FILTER BAR
+  function createRegionCheckboxes() {
+    const container = document.getElementById("regionCheckboxContainer");
+    container.innerHTML = "";
+    
+    provincesList.forEach(prov => {
+      const label = document.createElement("label");
+      label.className = "checkbox-item";
+      
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = selectedRegions[prov];
+      checkbox.value = prov;
+      
+      checkbox.addEventListener("change", (e) => {
+        selectedRegions[prov] = e.target.checked;
+        updateLineChartVisibility(); // Hanya meng-update Line Chart Tren saja sesuai keinginan!
+      });
+      
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(prov));
+      container.appendChild(label);
+    });
+  }
+
+  // 3. FUNGSI UPDATE DATA INTERAKTIF
   function animateKPI(year) {
     const dataYear = umpData[year];
     if (!dataYear) return;
     const values = Object.values(dataYear);
-    const avg = Math.round(values.reduce((a,b) => a+b,0) / values.length);
-    const highestProv = Object.keys(dataYear).reduce((a,b) => dataYear[a] > dataYear[b] ? a : b);
-    const lowestProv = Object.keys(dataYear).reduce((a,b) => dataYear[a] < dataYear[b] ? a : b);
+    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+    const highestProv = Object.keys(dataYear).reduce((a, b) => dataYear[a] > dataYear[b] ? a : b);
+    const lowestProv = Object.keys(dataYear).reduce((a, b) => dataYear[a] < dataYear[b] ? a : b);
     const highestVal = dataYear[highestProv];
     const lowestVal = dataYear[lowestProv];
 
@@ -368,7 +457,7 @@
 
     function countUp(start, end, element) {
       let current = start;
-      const step = Math.ceil((end - start) / 40);
+      const step = Math.ceil((end - start) / 30);
       const timer = setInterval(() => {
         current += step;
         if (current >= end) {
@@ -376,12 +465,12 @@
           clearInterval(timer);
         }
         element.innerText = current.toLocaleString("id-ID");
-      }, 15);
+      }, 20);
     }
 
-    let oldAvg = parseInt(avgElem.innerText.replace(/\./g,'')) || 0;
-    let oldHigh = parseInt(highestValElem.innerText.replace(/\./g,'')) || 0;
-    let oldLow = parseInt(lowestValElem.innerText.replace(/\./g,'')) || 0;
+    let oldAvg = parseInt(avgElem.innerText.replace(/\./g, '')) || 0;
+    let oldHigh = parseInt(highestValElem.innerText.replace(/\./g, '')) || 0;
+    let oldLow = parseInt(lowestValElem.innerText.replace(/\./g, '')) || 0;
     countUp(oldAvg, avg, avgElem);
     countUp(oldHigh, highestVal, highestValElem);
     countUp(oldLow, lowestVal, lowestValElem);
@@ -389,55 +478,69 @@
 
   function updateBarChart() {
     if (!barChart) return;
-    let newLabels = [];
-    let newData = [];
+    let baseLabels = [];
+    let baseData = [];
     const barTitleElem = document.getElementById("barChartTitle");
 
     if (currentBarMode === "ump") {
       const yearData = umpData[currentYear];
-      newLabels = Object.keys(yearData);
-      newData = Object.values(yearData);
+      baseLabels = Object.keys(yearData);
+      baseData = Object.values(yearData);
       barChart.data.datasets[0].label = `Upah Minimum Provinsi (Rp) - ${currentYear}`;
-      // SINKRONISASI JUDUL BAR CHART (UMP)
       barTitleElem.innerText = `Perbandingan UMP per Provinsi (${currentYear})`;
     } else {
-      newLabels = Object.keys(avgWagePerHour);
-      newData = Object.values(avgWagePerHour);
-      barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp) - (Estimasi)`;
-      // SINKRONISASI JUDUL BAR CHART (UPAH/JAM)
+      baseLabels = Object.keys(avgWagePerHour);
+      baseData = Object.values(avgWagePerHour);
+      barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp)`;
       barTitleElem.innerText = `Rata-rata Upah per Jam per Provinsi`;
     }
-    barChart.data.labels = newLabels;
-    barChart.data.datasets[0].data = newData;
-    barChart.update({ duration: 800, easing: 'easeOutCubic' });
+
+    // Bar Chart tetap menampilkan seluruh data provinsi secara penuh tanpa terpengaruh checkbox
+    barChart.data.labels = baseLabels;
+    barChart.data.datasets[0].data = baseData;
+    barChart.update({ duration: 600, easing: 'easeOutCubic' });
   }
 
-  // SINKRONISASI DATA SCATTER CHART DINAMIS BERDASARKAN TAHUN
+  // Mengubah status visibilitas garis tren dinamis sinkron dengan checkbox
+  function updateLineChartVisibility() {
+    if (!lineChart) return;
+    Object.keys(lineDataSets).forEach((prov, index) => {
+      if (lineChart.data.datasets[index]) {
+        lineChart.data.datasets[index].hidden = !selectedRegions[prov];
+      }
+    });
+    lineChart.update({ duration: 600, easing: 'easeOutCubic' });
+  }
+
   function updateScatterChart() {
     if (!scatterChart) return;
-    
-    const updatedScatterData = provincesForScatter.map(prov => ({
+    const updatedScatterData = provincesList.map(prov => ({
       x: umpData[currentYear][prov],
       y: avgWagePerHour[prov]
     }));
-
     scatterChart.data.datasets[0].data = updatedScatterData;
     scatterChart.options.scales.x.title.text = `UMP ${currentYear} (Rupiah)`;
-    
-    // SINKRONISASI JUDUL SCATTER CHART
-    const scatterTitleElem = document.getElementById("scatterChartTitle");
-    scatterTitleElem.innerText = `Korelasi UMP ${currentYear} vs Rata-rata Upah per Jam`;
-    
+    document.getElementById("scatterChartTitle").innerText = `Korelasi UMP ${currentYear} vs Rata-rata Upah per Jam`;
     scatterChart.update({ duration: 800 });
   }
 
-  function refreshKPIAndBar() {
-    animateKPI(currentYear);
-    updateBarChart();
-    updateScatterChart(); // Panggil update scatter chart di sini
+  function updateDoughnutChart() {
+    if (!doughnutChart) return;
+    doughnutChart.data.datasets[0].data = expenditureData[currentYear];
+    document.getElementById("doughnutChartTitle").innerText = `Proporsi Rata-rata Pengeluaran Pekerja (${currentYear})`;
+    doughnutChart.update({ duration: 800 });
   }
 
+  function refreshKPIAndCharts() {
+    animateKPI(currentYear);
+    updateBarChart();
+    updateScatterChart();
+    updateDoughnutChart();
+  }
+
+  // 4. INISIALISASI SELURUH CHART
   function initCharts() {
+    // A. BAR CHART
     const ctxBar = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxBar, {
       type: 'bar',
@@ -449,7 +552,7 @@
           backgroundColor: '#44aaffaa',
           borderColor: '#0ff',
           borderWidth: 1.5,
-          borderRadius: 8,
+          borderRadius: 6,
           hoverBackgroundColor: '#ff44ccaa'
         }]
       },
@@ -462,119 +565,91 @@
         },
         scales: {
           y: { beginAtZero: false, ticks: { callback: (val) => val.toLocaleString('id-ID'), color: '#bbddff' }, grid: { color: '#335588' } },
-          x: { ticks: { rotation: 0, autoSkip: true, maxRotation: 0, minRotation: 0, color: '#ccddff' }, grid: { color: '#224466' } }
-        },
-        animation: { duration: 1000, easing: 'easeOutQuart' }
+          x: { ticks: { rotation: 45, autoSkip: false, color: '#ccddff' }, grid: { color: '#224466' } }
+        }
       }
     });
 
+    // B. LINE CHART - 10 PROVINSI
     const ctxLine = document.getElementById('lineChart').getContext('2d');
+    const colors = ['#00ffff', '#2272fb', '#b547f9', '#ff007f', '#00ff66', '#ffcc00', '#ff5400', '#00ffee', '#ccff00', '#ff0054'];
+    const datasetsArray = Object.keys(lineDataSets).map((prov, index) => ({
+      label: prov,
+      data: lineDataSets[prov],
+      borderColor: colors[index % colors.length],
+      backgroundColor: colors[index % colors.length],
+      tension: 0.15,
+      fill: false,
+      pointRadius: 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: colors[index % colors.length],
+      hidden: false
+    }));
+
     lineChart = new Chart(ctxLine, {
       type: 'line',
-      data: {
-        labels: lineLabels,
-        datasets: [
-          { label: 'DKI Jakarta', data: lineDataSets["DKI Jakarta"], borderColor: '#0ff', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: '#0ff' },
-          { label: 'Jawa Barat', data: lineDataSets["Jawa Barat"], borderColor: '#2272fb', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#2272fb' },
-          { label: 'Jawa Timur', data: lineDataSets["Jawa Timur"], borderColor: '#b547f9', backgroundColor: 'transparent', tension: 0.3, fill: false, pointRadius: 5, pointBackgroundColor: '#b547f9' }
-        ]
-      },
+      data: { labels: lineLabels, datasets: datasetsArray },
       options: {
         responsive: true,
-        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')} Rp` } }, legend: { labels: { color: '#ccffff' } } },
-        scales: { y: { ticks: { callback: (val) => val.toLocaleString('id-ID'), color: '#bbddff' }, grid: { color: '#335588' } }, x: { ticks: { color: '#ccddff' }, grid: { color: '#224466' } } },
-        animation: { duration: 1200, easing: 'easeOutQuart', animateScale: true }
+        maintainAspectRatio: true,
+        plugins: { 
+          tooltip: { mode: 'index', intersect: false, callbacks: { label: (ctx) => `${ctx.dataset.label}: Rp ${ctx.raw.toLocaleString('id-ID')}` } }, 
+          legend: { position: 'top', labels: { color: '#ccffff', boxWidth: 10, font: { size: 9 } } } 
+        },
+        scales: { 
+          y: { ticks: { callback: (val) => val.toLocaleString('id-ID'), color: '#bbddff' }, grid: { color: '#335588' } }, 
+          x: { ticks: { color: '#ccddff' }, grid: { color: '#224466' } } 
+        }
       }
     });
 
+    // C. DOUGHNUT CHART
     const ctxDough = document.getElementById('doughnutChart').getContext('2d');
     doughnutChart = new Chart(ctxDough, {
       type: 'doughnut',
       data: {
-        labels: expenditureData.labels,
-        datasets: [{ data: expenditureData.values, backgroundColor: ['#0ff', '#bf4eff'], borderWidth: 0, hoverOffset: 12 }]
+        labels: ["Pengeluaran Pangan/Makanan", "Pengeluaran Non-Makanan (Perumahan, Edukasi, Kesehatan)"],
+        datasets: [{ data: expenditureData["2023"], backgroundColor: ['#0ff', '#bf4eff'], borderWidth: 0, hoverOffset: 10 }]
       },
       options: {
         responsive: true,
-        cutout: '60%',
-        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }, legend: { labels: { color: '#ccffff' }, position: 'bottom' } },
-        animation: { animateRotate: true, duration: 1400, easing: 'easeOutBounce' }
+        cutout: '65%',
+        plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }, legend: { labels: { color: '#ccffff' }, position: 'bottom' } }
       }
     });
 
-    // Inisialisasi awal Scatter Chart menggunakan data penampung dinamis
+    // D. SCATTER CHART
     const ctxScatter = document.getElementById('scatterChart').getContext('2d');
-    const initialScatterData = provincesForScatter.map(prov => ({
-      x: umpData["2023"][prov],
-      y: avgWagePerHour[prov]
-    }));
-
+    const initialScatterData = provincesList.map(prov => ({ x: umpData["2023"][prov], y: avgWagePerHour[prov] }));
     scatterChart = new Chart(ctxScatter, {
       type: 'scatter',
       data: {
-        datasets: [{
-          label: 'Provinsi (UMP vs Upah/jam)',
-          data: initialScatterData,
-          backgroundColor: '#b547f9',
-          pointRadius: 8,
-          pointHoverRadius: 14,
-          pointBorderColor: '#0ff',
-          borderWidth: 2,
-          showLine: false
-        }]
+        datasets: [{ label: 'Provinsi', data: initialScatterData, backgroundColor: '#b547f9', pointRadius: 7, pointHoverRadius: 12, pointBorderColor: '#0ff', borderWidth: 1.5 }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const prov = provincesForScatter[ctx.dataIndex];
-                return `${prov}: UMP = ${ctx.parsed.x.toLocaleString('id-ID')} Rp, Upah/jam = ${ctx.parsed.y.toLocaleString('id-ID')} Rp`;
-              }
-            }
-          },
+          tooltip: { callbacks: { label: (ctx) => `${provincesList[ctx.dataIndex]}: UMP = Rp ${ctx.parsed.x.toLocaleString('id-ID')}, Upah/Jam = Rp ${ctx.parsed.y.toLocaleString('id-ID')}` } },
           legend: { display: false }
         },
         scales: {
-          x: { 
-            title: { display: true, text: 'UMP 2023 (Rupiah)', color: '#aaffff' }, 
-            ticks: { 
-              rotation: 0, 
-              color: '#bbddff',
-              callback: function(val) {
-                return val.toLocaleString('id-ID');
-              }
-            }, 
-            grid: { color: '#335588' } 
-          },
-          y: { 
-            title: { display: true, text: 'Rata-rata Upah per Jam (Rupiah)', color: '#aaffff' }, 
-            ticks: { 
-              rotation: 0, 
-              color: '#bbddff',
-              callback: function(val) {
-                return val.toLocaleString('id-ID');
-              }
-            }, 
-            grid: { color: '#335588' } 
-          }
-        },
-        animation: { duration: 1200, easing: 'easeOutCubic', animateScale: true }
+          x: { title: { display: true, text: 'UMP 2023 (Rupiah)', color: '#aaffff' }, ticks: { color: '#bbddff', callback: (v) => v.toLocaleString('id-ID') }, grid: { color: '#335588' } },
+          y: { title: { display: true, text: 'Rata-rata Upah per Jam (Rupiah)', color: '#aaffff' }, ticks: { color: '#bbddff', callback: (v) => v.toLocaleString('id-ID') }, grid: { color: '#335588' } }
+        }
       }
     });
   }
 
   function bindEvents() {
-    const yearSelect = document.getElementById('yearFilter');
-    yearSelect.addEventListener('change', (e) => {
+    document.getElementById('yearFilter').addEventListener('change', (e) => {
       currentYear = e.target.value;
-      refreshKPIAndBar();
+      refreshKPIAndCharts();
     });
 
     const toggleUmp = document.getElementById('toggleBarBtn');
     const toggleAvg = document.getElementById('toggleAvgWageBtn');
+    
     toggleUmp.addEventListener('click', () => {
       currentBarMode = 'ump';
       toggleUmp.classList.add('active');
@@ -590,14 +665,11 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    createRegionCheckboxes();
     initCharts();
     bindEvents();
-    currentYear = "2023";
-    currentBarMode = "ump";
     animateKPI("2023");
-    console.log("Dashboard galaxy neon: semua chart aktif, efek glow dan warna hitam-neon");
   });
 </script>
-
 </body>
 </html>
