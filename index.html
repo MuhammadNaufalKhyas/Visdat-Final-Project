@@ -281,19 +281,19 @@
 
   <div class="charts-grid">
     <div class="chart-container">
-      <div class="chart-title"> Perbandingan UMP per Provinsi (2023)</div>
+      <div class="chart-title" id="barChartTitle"> Perbandingan UMP per Provinsi</div>
       <canvas id="barChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title"> Tren UMP 3 Provinsi Utama (2020-2023)</div>
+      <div class="chart-title" id="lineChartTitle"> Tren UMP 3 Provinsi Utama (2020-2023)</div>
       <canvas id="lineChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title"> Proporsi Pengeluaran Pekerja (Per Kapita / Bulan)</div>
+      <div class="chart-title" id="doughnutChartTitle"> Proporsi Pengeluaran Pekerja (Per Kapita / Bulan)</div>
       <canvas id="doughnutChart" width="400" height="280"></canvas>
     </div>
     <div class="chart-container">
-      <div class="chart-title"> Korelasi UMP 2023 vs Rata-rata Upah per Jam</div>
+      <div class="chart-title" id="scatterChartTitle"> Korelasi UMP 2023 vs Rata-rata Upah per Jam</div>
       <canvas id="scatterChart" width="400" height="280"></canvas>
     </div>
   </div>
@@ -342,10 +342,6 @@
   };
 
   const provincesForScatter = Object.keys(umpData["2023"]);
-  const scatterData = provincesForScatter.map(prov => ({
-    x: umpData["2023"][prov],
-    y: avgWagePerHour[prov]
-  }));
 
   let barChart, lineChart, doughnutChart, scatterChart;
   let currentBarMode = "ump";
@@ -395,24 +391,50 @@
     if (!barChart) return;
     let newLabels = [];
     let newData = [];
+    const barTitleElem = document.getElementById("barChartTitle");
+
     if (currentBarMode === "ump") {
       const yearData = umpData[currentYear];
       newLabels = Object.keys(yearData);
       newData = Object.values(yearData);
       barChart.data.datasets[0].label = `Upah Minimum Provinsi (Rp) - ${currentYear}`;
+      // SINKRONISASI JUDUL BAR CHART (UMP)
+      barTitleElem.innerText = `Perbandingan UMP per Provinsi (${currentYear})`;
     } else {
       newLabels = Object.keys(avgWagePerHour);
       newData = Object.values(avgWagePerHour);
-      barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp) - ${currentYear} (estimasi)`;
+      barChart.data.datasets[0].label = `Rata-rata Upah per Jam (Rp) - (Estimasi)`;
+      // SINKRONISASI JUDUL BAR CHART (UPAH/JAM)
+      barTitleElem.innerText = `Rata-rata Upah per Jam per Provinsi`;
     }
     barChart.data.labels = newLabels;
     barChart.data.datasets[0].data = newData;
     barChart.update({ duration: 800, easing: 'easeOutCubic' });
   }
 
+  // SINKRONISASI DATA SCATTER CHART DINAMIS BERDASARKAN TAHUN
+  function updateScatterChart() {
+    if (!scatterChart) return;
+    
+    const updatedScatterData = provincesForScatter.map(prov => ({
+      x: umpData[currentYear][prov],
+      y: avgWagePerHour[prov]
+    }));
+
+    scatterChart.data.datasets[0].data = updatedScatterData;
+    scatterChart.options.scales.x.title.text = `UMP ${currentYear} (Rupiah)`;
+    
+    // SINKRONISASI JUDUL SCATTER CHART
+    const scatterTitleElem = document.getElementById("scatterChartTitle");
+    scatterTitleElem.innerText = `Korelasi UMP ${currentYear} vs Rata-rata Upah per Jam`;
+    
+    scatterChart.update({ duration: 800 });
+  }
+
   function refreshKPIAndBar() {
     animateKPI(currentYear);
     updateBarChart();
+    updateScatterChart(); // Panggil update scatter chart di sini
   }
 
   function initCharts() {
@@ -480,13 +502,19 @@
       }
     });
 
+    // Inisialisasi awal Scatter Chart menggunakan data penampung dinamis
     const ctxScatter = document.getElementById('scatterChart').getContext('2d');
+    const initialScatterData = provincesForScatter.map(prov => ({
+      x: umpData["2023"][prov],
+      y: avgWagePerHour[prov]
+    }));
+
     scatterChart = new Chart(ctxScatter, {
       type: 'scatter',
       data: {
         datasets: [{
           label: 'Provinsi (UMP vs Upah/jam)',
-          data: scatterData,
+          data: initialScatterData,
           backgroundColor: '#b547f9',
           pointRadius: 8,
           pointHoverRadius: 14,
@@ -570,5 +598,6 @@
     console.log("Dashboard galaxy neon: semua chart aktif, efek glow dan warna hitam-neon");
   });
 </script>
+
 </body>
 </html>
